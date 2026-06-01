@@ -31,8 +31,9 @@ export const apiFetch = async (path, options = {}) => {
     headers,
   });
 
-  // Jika token tidak valid → paksa logout
-  if (res.status === 401 || res.status === 403) {
+  // Jika token tidak valid pada request biasa → paksa logout
+  // JANGAN reload jika sedang melakukan login/register (/auth/)
+  if ((res.status === 401 || res.status === 403) && !path.includes("/auth/")) {
     localStorage.removeItem("techhire_token");
     localStorage.removeItem("techhire_user");
     window.location.reload(); // Reload akan trigger redirect ke login
