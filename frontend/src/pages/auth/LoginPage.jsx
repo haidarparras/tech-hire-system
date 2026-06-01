@@ -62,23 +62,23 @@ const LoginPage = ({ setRole, setActivePage, onLogin }) => {
 
   const inputStyle = {
     width: "100%",
-    padding: "14px 16px",
+    padding: "10px 14px",
     background: "rgba(255, 255, 255, 0.05)",
     border: "1px solid rgba(255, 255, 255, 0.1)",
-    borderRadius: "12px",
+    borderRadius: "10px",
     color: "white",
-    fontSize: 15,
+    fontSize: 14,
     outline: "none",
     transition: "border-color 0.2s",
-    marginBottom: 16,
+    marginBottom: 10,
     fontFamily: "var(--font-sans)"
   };
 
   const labelStyle = {
     display: "block",
-    fontSize: 13,
+    fontSize: 12,
     color: "var(--text-secondary)",
-    marginBottom: 8,
+    marginBottom: 4,
     fontWeight: 600,
     fontFamily: "var(--font-sans)"
   };
@@ -89,25 +89,25 @@ const LoginPage = ({ setRole, setActivePage, onLogin }) => {
       <div className="login-left-section">
         <div style={{ maxWidth: 440, margin: "0 auto", width: "100%" }}>
           {/* Logo */}
-          <div style={{ fontSize: 28, fontWeight: 900, fontFamily: "var(--font-display)", marginBottom: 40 }}>
+          <div style={{ fontSize: 24, fontWeight: 900, fontFamily: "var(--font-display)", marginBottom: 16 }}>
             <span style={{ color: "white" }}>Tech</span>
             <span style={{ color: primaryBrand }}>Hire</span>
           </div>
 
-          <h1 style={{ fontSize: "clamp(32px, 4vw, 44px)", fontWeight: 800, marginBottom: 16, color: "white", fontFamily: "var(--font-display)" }}>
+          <h1 style={{ fontSize: "clamp(24px, 3vw, 32px)", fontWeight: 800, marginBottom: 8, color: "white", fontFamily: "var(--font-display)" }}>
             {isLogin ? "Welcome!" : "Create Account"}
           </h1>
-          <p style={{ fontSize: 16, color: "var(--text-secondary)", lineHeight: 1.6, marginBottom: 40 }}>
+          <p style={{ fontSize: 14, color: "var(--text-secondary)", lineHeight: 1.5, marginBottom: 20 }}>
             Access your TechHire dashboard to manage recruitment and unlock limitless opportunities.
           </p>
 
           <div style={{
             background: "var(--bg-card)",
-            borderRadius: 24,
-            padding: "40px 32px",
+            borderRadius: 20,
+            padding: "24px 24px",
             border: "1px solid rgba(255,255,255,0.05)",
             boxShadow: "0 20px 50px rgba(0,0,0,0.3)",
-            marginBottom: 32
+            marginBottom: 16
           }}>
             {error && (
               <div style={{
@@ -179,14 +179,14 @@ const LoginPage = ({ setRole, setActivePage, onLogin }) => {
                 type="submit" 
                 style={{ 
                   width: "100%", 
-                  padding: "16px", 
-                  marginTop: 16, 
-                  fontSize: 16, 
+                  padding: "12px", 
+                  marginTop: 10, 
+                  fontSize: 15, 
                   fontWeight: 700,
                   background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
                   color: "white",
                   border: "none",
-                  borderRadius: 12,
+                  borderRadius: 10,
                   cursor: "pointer",
                   transition: "opacity 0.2s",
                   display: "flex",
@@ -349,14 +349,14 @@ const LoginPage = ({ setRole, setActivePage, onLogin }) => {
         .login-left-section {
           flex: 1 1 50%;
           min-width: 320px;
-          padding: 40px 6%;
+          padding: 24px 6%;
           display: flex;
           flex-direction: column;
           justify-content: center;
           background-color: var(--bg-primary, #050814);
           position: relative;
           height: 100%;
-          overflow-y: auto;
+          overflow: hidden;
         }
 
         .login-right-section {
