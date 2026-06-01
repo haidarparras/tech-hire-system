@@ -1,0 +1,83 @@
+import pool from './db.js';
+
+async function initDb() {
+  try {
+    // ── 1. Tabel roles (HARUS dibuat sebelum users karena FK) ──────────────
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS roles (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        role_name VARCHAR(50) NOT NULL UNIQUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // Seed default roles jika belum ada
+    const roleDefaults = ['admin', 'user', 'hrd'];
+    for (const roleName of roleDefaults) {
+      await pool.query(
+        `INSERT IGNORE INTO roles (role_name) VALUES (?)`,
+        [roleName]
+      );
+    }
+
+    // ── 2. Tabel users ──────────────────────────────────────────────────────
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        email VARCHAR(255) NOT NULL UNIQUE,
+        password VARCHAR(255) NOT NULL,
+        role_id INT NOT NULL DEFAULT 2,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (role_id) REFERENCES roles(id)
+      )
+    `);
+
+    // ── 3. Tabel jobs ───────────────────────────────────────────────────────
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS jobs (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        department VARCHAR(255),
+        location VARCHAR(255),
+        type VARCHAR(100) DEFAULT 'Full-time',
+        description TEXT,
+        requirements TEXT,
+        status ENUM('open','closed','draft') DEFAULT 'open',
+        applicants INT DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // ── 4. Tabel announcements ──────────────────────────────────────────────
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS announcements (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        content TEXT NOT NULL,
+        type ENUM('info', 'warning', 'success') DEFAULT 'info',
+        created_by INT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+      )
+    `);
+
+    // ── 5. Tabel activity_logs ──────────────────────────────────────────────
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS activity_logs (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        action VARCHAR(255) NOT NULL,
+        description TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+      )
+    `);
+
+    console.log('[DB] Database initialized: semua tabel siap.');
+  } catch (error) {
+    console.error('[DB ERROR] Gagal menginisialisasi database:', error);
+  }
+}
+
+export default initDb;
