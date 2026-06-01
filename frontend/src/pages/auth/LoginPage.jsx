@@ -84,24 +84,9 @@ const LoginPage = ({ setRole, setActivePage, onLogin }) => {
   };
 
   return (
-    <div style={{
-      display: "flex", 
-      flexWrap: "wrap",
-      minHeight: "100vh",
-      backgroundColor: "var(--bg-dark)",
-      color: "var(--text-primary)"
-    }}>
+    <div className="login-container">
       {/* LEFT SECTION (Form) */}
-      <div style={{
-        flex: "1 1 50%",
-        minWidth: 320,
-        padding: "40px 6%",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        backgroundColor: "var(--bg-dark)",
-        position: "relative"
-      }}>
+      <div className="login-left-section">
         <div style={{ maxWidth: 440, margin: "0 auto", width: "100%" }}>
           {/* Logo */}
           <div style={{ fontSize: 28, fontWeight: 900, fontFamily: "var(--font-display)", marginBottom: 40 }}>
@@ -231,18 +216,7 @@ const LoginPage = ({ setRole, setActivePage, onLogin }) => {
       </div>
 
       {/* RIGHT SECTION (Graphics) */}
-      <div style={{
-        flex: "1 1 50%",
-        minWidth: 320,
-        backgroundColor: primaryBrand,
-        background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
-        color: "white",
-        padding: "60px 40px",
-        display: "flex",
-        flexDirection: "column",
-        position: "relative",
-        overflow: "hidden"
-      }}>
+      <div className="login-right-section">
         {/* Decorative Circles */}
         <div style={{ position: "absolute", top: -100, right: -100, width: 400, height: 400, borderRadius: "50%", border: "40px solid rgba(255,255,255,0.05)", zIndex: 0 }} />
         <div style={{ position: "absolute", bottom: -50, left: -50, width: 250, height: 250, borderRadius: "50%", border: "20px solid rgba(255,255,255,0.05)", zIndex: 0 }} />
@@ -348,14 +322,74 @@ const LoginPage = ({ setRole, setActivePage, onLogin }) => {
       </div>
 
       <style>{`
+        .login-container {
+          display: flex;
+          flex-wrap: wrap;
+          height: 100vh;
+          overflow: hidden;
+          background-color: var(--bg-primary, #050814);
+          color: var(--text-primary);
+        }
+
+        .login-left-section {
+          flex: 1 1 50%;
+          min-width: 320px;
+          padding: 40px 6%;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          background-color: var(--bg-primary, #050814);
+          position: relative;
+          height: 100%;
+          overflow-y: auto;
+        }
+
+        .login-right-section {
+          flex: 1 1 50%;
+          min-width: 320px;
+          background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+          color: white;
+          padding: 60px 40px;
+          display: flex;
+          flex-direction: column;
+          position: relative;
+          overflow: hidden;
+          height: 100%;
+        }
+
+        .login-left-section::-webkit-scrollbar {
+          width: 6px;
+        }
+        .login-left-section::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .login-left-section::-webkit-scrollbar-thumb {
+          background: rgba(99, 102, 241, 0.3);
+          border-radius: 9999px;
+        }
+
         @keyframes float {
           0% { transform: translateY(0px); }
           50% { transform: translateY(-10px); }
           100% { transform: translateY(0px); }
         }
         
-        /* Add some specific responsive adjustments */
         @media (max-width: 800px) {
+          .login-container {
+            height: auto;
+            min-height: 100vh;
+            overflow: auto;
+          }
+          .login-left-section {
+            height: auto;
+            overflow: visible;
+            padding: 60px 24px 40px;
+          }
+          .login-right-section {
+            height: auto;
+            overflow: visible;
+            padding: 40px 24px 60px;
+          }
           .glass-card { margin: 0; }
         }
       `}</style>
