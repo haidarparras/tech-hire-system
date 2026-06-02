@@ -1,6 +1,9 @@
 import json
 import os
+import shutil
+from pathlib import Path
 from fastapi import APIRouter, UploadFile, File, HTTPException, Depends, Form
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 from typing import Optional
 
@@ -9,6 +12,10 @@ from models.schemas import CVAnalysisResult
 from services import ai_service
 
 router = APIRouter()
+
+# Direktori penyimpanan file CV
+CV_UPLOAD_DIR = Path("uploads/cv")
+CV_UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 # Avatar emoji pool berdasarkan kategori
 CATEGORY_AVATARS = {
@@ -66,6 +73,13 @@ async def analyze_cv(
     if should_save:
         try:
             category = result["category"]
+
+            # Simpan file CV ke disk
+            safe_name = f"{result['name'].replace(' ', '_')}_{file.filename}"
+            cv_save_path = CV_UPLOAD_DIR / safe_name
+            with open(cv_save_path, "wb") as f:
+                f.write(file_bytes)
+
             candidate = Candidate(
                 name=result["name"],
                 position=result["position"],
@@ -76,6 +90,8 @@ async def analyze_cv(
                 status="new",
                 avatar=CATEGORY_AVATARS.get(category, "👤"),
                 color=CATEGORY_COLORS.get(category, "#6366f1"),
+                cv_path=str(cv_save_path),
+                cv_filename=file.filename,
             )
             db.add(candidate)
             db.commit()
@@ -83,6 +99,21 @@ async def analyze_cv(
             print(f"[WARN] Gagal simpan kandidat ke DB: {e}")
 
     return CVAnalysisResult(**result)
+
+
+# ── GET /api/ai/cv/{candidate_id} — Serve file CV ────────────
+@router.get("/cv/{candidate_id}")
+def get_cv_file(candidate_id: int, db: Session = Depends(get_db)):
+    candidate = db.query(Candidate).filter(Candidate.id == candidate_id).first()
+    if not candidate:
+        raise HTTPException(404, "Kandidat tidak ditemukan")
+    if not candidate.cv_path or not Path(candidate.cv_path).exists():
+        raise HTTPException(404, "File CV tidak tersedia")
+    return FileResponse(
+        path=candidate.cv_path,
+        filename=candidate.cv_filename or "cv.pdf",
+        media_type="application/octet-stream",
+    )
 
 
 # ── POST /api/ai/analyze-text ────────────────────────────────

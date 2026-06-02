@@ -168,7 +168,11 @@ function App() {
 
       case "interviews":
         if (role !== "hrd" && role !== "admin") return <PageWrapper><LoginPage setRole={setRole} setActivePage={setActivePage} onLogin={handleLogin} /></PageWrapper>;
-        return <PageWrapper><InterviewsPage /></PageWrapper>;
+        return <PageWrapper><InterviewsPage setActivePage={setActivePage} /></PageWrapper>;
+
+      case "hrd-upload":
+        if (role !== "hrd" && role !== "admin") return <PageWrapper><LoginPage setRole={setRole} setActivePage={setActivePage} onLogin={handleLogin} /></PageWrapper>;
+        return <PageWrapper><CVUploadPage setActivePage={setActivePage} /></PageWrapper>;
 
       // ── Admin also has access to candidates pipeline ─────────────
       case "candidates-admin":

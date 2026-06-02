@@ -50,6 +50,8 @@ class CandidateResponse(BaseModel):
     status: Optional[str]
     avatar: Optional[str]
     color: Optional[str]
+    cv_path: Optional[str]
+    cv_filename: Optional[str]
     created_at: Optional[datetime]
 
     class Config:
