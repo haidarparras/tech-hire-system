@@ -62,67 +62,52 @@ const LoginPage = ({ setRole, setActivePage, onLogin }) => {
 
   const inputStyle = {
     width: "100%",
-    padding: "14px 16px",
+    padding: "10px 14px",
     background: "rgba(255, 255, 255, 0.05)",
     border: "1px solid rgba(255, 255, 255, 0.1)",
-    borderRadius: "12px",
+    borderRadius: "10px",
     color: "white",
-    fontSize: 15,
+    fontSize: 14,
     outline: "none",
     transition: "border-color 0.2s",
-    marginBottom: 16,
+    marginBottom: 10,
     fontFamily: "var(--font-sans)"
   };
 
   const labelStyle = {
     display: "block",
-    fontSize: 13,
+    fontSize: 12,
     color: "var(--text-secondary)",
-    marginBottom: 8,
+    marginBottom: 4,
     fontWeight: 600,
     fontFamily: "var(--font-sans)"
   };
 
   return (
-    <div style={{
-      display: "flex", 
-      flexWrap: "wrap",
-      minHeight: "100vh",
-      backgroundColor: "var(--bg-dark)",
-      color: "var(--text-primary)"
-    }}>
+    <div className="login-container">
       {/* LEFT SECTION (Form) */}
-      <div style={{
-        flex: "1 1 50%",
-        minWidth: 320,
-        padding: "40px 6%",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        backgroundColor: "var(--bg-dark)",
-        position: "relative"
-      }}>
+      <div className="login-left-section">
         <div style={{ maxWidth: 440, margin: "0 auto", width: "100%" }}>
           {/* Logo */}
-          <div style={{ fontSize: 28, fontWeight: 900, fontFamily: "var(--font-display)", marginBottom: 40 }}>
+          <div style={{ fontSize: 24, fontWeight: 900, fontFamily: "var(--font-display)", marginBottom: 16 }}>
             <span style={{ color: "white" }}>Tech</span>
             <span style={{ color: primaryBrand }}>Hire</span>
           </div>
 
-          <h1 style={{ fontSize: "clamp(32px, 4vw, 44px)", fontWeight: 800, marginBottom: 16, color: "white", fontFamily: "var(--font-display)" }}>
+          <h1 style={{ fontSize: "clamp(24px, 3vw, 32px)", fontWeight: 800, marginBottom: 8, color: "white", fontFamily: "var(--font-display)" }}>
             {isLogin ? "Welcome!" : "Create Account"}
           </h1>
-          <p style={{ fontSize: 16, color: "var(--text-secondary)", lineHeight: 1.6, marginBottom: 40 }}>
+          <p style={{ fontSize: 14, color: "var(--text-secondary)", lineHeight: 1.5, marginBottom: 20 }}>
             Access your TechHire dashboard to manage recruitment and unlock limitless opportunities.
           </p>
 
           <div style={{
             background: "var(--bg-card)",
-            borderRadius: 24,
-            padding: "40px 32px",
+            borderRadius: 20,
+            padding: "24px 24px",
             border: "1px solid rgba(255,255,255,0.05)",
             boxShadow: "0 20px 50px rgba(0,0,0,0.3)",
-            marginBottom: 32
+            marginBottom: 16
           }}>
             {error && (
               <div style={{
@@ -194,14 +179,14 @@ const LoginPage = ({ setRole, setActivePage, onLogin }) => {
                 type="submit" 
                 style={{ 
                   width: "100%", 
-                  padding: "16px", 
-                  marginTop: 16, 
-                  fontSize: 16, 
+                  padding: "12px", 
+                  marginTop: 10, 
+                  fontSize: 15, 
                   fontWeight: 700,
                   background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
                   color: "white",
                   border: "none",
-                  borderRadius: 12,
+                  borderRadius: 10,
                   cursor: "pointer",
                   transition: "opacity 0.2s",
                   display: "flex",
@@ -213,7 +198,7 @@ const LoginPage = ({ setRole, setActivePage, onLogin }) => {
                 onMouseEnter={e => e.currentTarget.style.opacity = 0.9}
                 onMouseLeave={e => e.currentTarget.style.opacity = 1}
               >
-                {loading ? "Processing..." : (isLogin ? "Continue with E-mail" : "Create Account")}
+                {loading ? "Processing..." : (isLogin ? "Masuk" : "Create Account")}
               </button>
             </form>
           </div>
@@ -231,68 +216,72 @@ const LoginPage = ({ setRole, setActivePage, onLogin }) => {
       </div>
 
       {/* RIGHT SECTION (Graphics) */}
-      <div style={{
-        flex: "1 1 50%",
-        minWidth: 320,
-        backgroundColor: primaryBrand,
-        background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
-        color: "white",
-        padding: "60px 40px",
-        display: "flex",
-        flexDirection: "column",
-        position: "relative",
-        overflow: "hidden"
-      }}>
-        {/* Decorative Circles */}
-        <div style={{ position: "absolute", top: -100, right: -100, width: 400, height: 400, borderRadius: "50%", border: "40px solid rgba(255,255,255,0.05)", zIndex: 0 }} />
-        <div style={{ position: "absolute", bottom: -50, left: -50, width: 250, height: 250, borderRadius: "50%", border: "20px solid rgba(255,255,255,0.05)", zIndex: 0 }} />
+      <div className="login-right-section">
+        {/* Ambient Glowing Orbs */}
+        <div style={{ position: "absolute", top: "5%", right: "-15%", width: 400, height: 400, borderRadius: "50%", background: "rgba(99, 102, 241, 0.4)", filter: "blur(110px)", pointerEvents: "none", zIndex: 0 }} />
+        <div style={{ position: "absolute", bottom: "5%", left: "-15%", width: 350, height: 350, borderRadius: "50%", background: "rgba(6, 182, 212, 0.35)", filter: "blur(90px)", pointerEvents: "none", zIndex: 0 }} />
 
-        <div style={{ position: "relative", zIndex: 1, maxWidth: 500, margin: "0 auto", width: "100%", paddingTop: "10vh" }}>
-          <h2 style={{ fontSize: "clamp(32px, 3.5vw, 48px)", fontWeight: 800, marginBottom: 24, lineHeight: 1.15, fontFamily: "var(--font-display)" }}>
-            Unlock Limitless Opportunities
+        {/* Grid Overlay */}
+        <div style={{ position: "absolute", inset: 0, backgroundImage: "linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px)", backgroundSize: "40px 40px", pointerEvents: "none", zIndex: 0 }} />
+
+        <div style={{ position: "relative", zIndex: 1, maxWidth: 500, margin: "0 auto", width: "100%", paddingBottom: 10 }}>
+          <div className="section-tag" style={{ display: "inline-flex", alignItems: "center", gap: 6, marginBottom: 16, background: "rgba(255, 255, 255, 0.1)", border: "1px solid rgba(255, 255, 255, 0.2)" }}>
+            <Icon name="ai" size={13} color="#a5b4fc" /> AI Recruitment System
+          </div>
+          <h2 style={{ fontSize: "clamp(24px, 3vw, 36px)", fontWeight: 800, marginBottom: 16, lineHeight: 1.2, fontFamily: "var(--font-display)", color: "white" }}>
+            Revolusi Rekrutmen Berbasis <span style={{
+              background: "linear-gradient(135deg, #06b6d4 0%, #a5f3fc 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text"
+            }}>AI Cerdas</span>
           </h2>
-          <p style={{ fontSize: 18, color: "rgba(255,255,255,0.9)", lineHeight: 1.6, marginBottom: 60 }}>
-            Partner with us to elevate your potential and achieve impactful, long-term success.
+          <p style={{ fontSize: 14, color: "#cbd5e1", lineHeight: 1.5, marginBottom: 32 }}>
+            Unggah CV, biarkan kecerdasan buatan menyaring kualifikasi, menganalisis kompetensi, dan merekomendasikan kandidat terbaik secara instan.
           </p>
 
           {/* Floating Elements Mockup */}
-          <div style={{ position: "relative", height: 300 }}>
+          <div style={{ position: "relative", height: 270 }}>
             
             {/* Dashboard Mockup Card */}
             <div style={{
               position: "absolute",
-              top: 0, left: 40, right: -40,
-              height: 250,
-              background: "rgba(255,255,255,0.05)",
+              top: 15, left: 15, right: 15,
+              height: 200,
+              background: "rgba(13, 21, 38, 0.55)",
               backdropFilter: "blur(20px)",
-              border: "1px solid rgba(255,255,255,0.1)",
-              borderRadius: 24,
-              boxShadow: "0 25px 50px rgba(0,0,0,0.15)",
-              padding: 24,
+              WebkitBackdropFilter: "blur(20px)",
+              border: "1px solid rgba(99, 102, 241, 0.2)",
+              borderRadius: 20,
+              boxShadow: "0 25px 50px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)",
+              padding: 18,
               display: "flex",
               flexDirection: "column",
-              gap: 16
+              gap: 12
             }}>
-              <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid rgba(255,255,255,0.1)", paddingBottom: 12 }}>
-                <div style={{ fontWeight: 800, color: "white", fontSize: 18 }}>Dashboard</div>
+              <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid rgba(255,255,255,0.08)", paddingBottom: 10 }}>
+                <div style={{ fontWeight: 800, color: "white", fontSize: 15, display: "flex", alignItems: "center", gap: 8 }}>
+                  <Icon name="analytics" size={16} color="#6366f1" /> TechHire Intelligence
+                </div>
+                <div className="badge badge-success" style={{ fontSize: 10 }}>AI Active</div>
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                <div style={{ background: "rgba(255,255,255,0.1)", borderRadius: 12, padding: 12, display: "flex", alignItems: "center", gap: 10 }}>
-                  <div style={{ width: 32, height: 32, borderRadius: 8, background: "rgba(255,255,255,0.2)", color: "white", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <Icon name="users" size={16} color="white" />
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                <div style={{ background: "rgba(255, 255, 255, 0.03)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: 12, padding: 10, display: "flex", alignItems: "center", gap: 10 }}>
+                  <div style={{ width: 32, height: 32, borderRadius: 8, background: "rgba(99, 102, 241, 0.15)", color: "#8b5cf6", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <Icon name="users" size={16} color="#8b5cf6" />
                   </div>
                   <div>
-                    <div style={{ fontSize: 16, fontWeight: 800, color: "white" }}>27</div>
-                    <div style={{ fontSize: 10, color: "rgba(255,255,255,0.7)" }}>Total Candidates</div>
+                    <div style={{ fontSize: 16, fontWeight: 800, color: "white", lineHeight: 1.2 }}>142</div>
+                    <div style={{ fontSize: 10, color: "var(--text-secondary)" }}>Total CV Masuk</div>
                   </div>
                 </div>
-                <div style={{ background: "rgba(255,255,255,0.1)", borderRadius: 12, padding: 12, display: "flex", alignItems: "center", gap: 10 }}>
-                  <div style={{ width: 32, height: 32, borderRadius: 8, background: "rgba(255,255,255,0.2)", color: "white", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <Icon name="briefcase" size={16} color="white" />
+                <div style={{ background: "rgba(255, 255, 255, 0.03)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: 12, padding: 10, display: "flex", alignItems: "center", gap: 10 }}>
+                  <div style={{ width: 32, height: 32, borderRadius: 8, background: "rgba(6, 182, 212, 0.15)", color: "#06b6d4", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <Icon name="zap" size={16} color="#06b6d4" />
                   </div>
                   <div>
-                    <div style={{ fontSize: 16, fontWeight: 800, color: "white" }}>8</div>
-                    <div style={{ fontSize: 10, color: "rgba(255,255,255,0.7)" }}>Current Openings</div>
+                    <div style={{ fontSize: 16, fontWeight: 800, color: "white", lineHeight: 1.2 }}>98%</div>
+                    <div style={{ fontSize: 10, color: "var(--text-secondary)" }}>Akurasi AI Match</div>
                   </div>
                 </div>
               </div>
@@ -301,45 +290,45 @@ const LoginPage = ({ setRole, setActivePage, onLogin }) => {
             {/* Floating Card 1 */}
             <div style={{
               position: "absolute",
-              top: -30, right: 20,
-              background: "rgba(255,255,255,0.05)",
+              top: -15, right: 10,
+              background: "rgba(13, 21, 38, 0.7)",
               backdropFilter: "blur(20px)",
-              border: "1px solid rgba(255,255,255,0.1)",
-              borderRadius: 20,
-              padding: "20px 24px",
-              boxShadow: "0 20px 40px rgba(0,0,0,0.2)",
-              textAlign: "center",
-              display: "flex", flexDirection: "column", alignItems: "center", gap: 12,
+              WebkitBackdropFilter: "blur(20px)",
+              border: "1px solid rgba(16, 185, 129, 0.3)",
+              borderRadius: 12,
+              padding: "10px 16px",
+              boxShadow: "0 20px 40px rgba(0,0,0,0.4)",
+              display: "flex", alignItems: "center", gap: 8,
               animation: "float 6s ease-in-out infinite"
             }}>
-              <div style={{ width: 48, height: 48, borderRadius: "50%", background: "rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <Icon name="briefcase" size={24} color="white" />
+              <div style={{ width: 28, height: 28, borderRadius: "50%", background: "rgba(16, 185, 129, 0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Icon name="check" size={14} color="#10b981" />
               </div>
-              <div style={{ color: "white", fontWeight: 700, fontSize: 13, maxWidth: 120, lineHeight: 1.4 }}>
-                No Extra Cost To Manage Recruitment
+              <div style={{ color: "white", fontWeight: 700, fontSize: 11, lineHeight: 1.3 }}>
+                Proses Instan &lt; 5 Detik
               </div>
             </div>
 
             {/* Floating Card 2 */}
             <div style={{
               position: "absolute",
-              bottom: -20, left: -20,
-              background: "rgba(255,255,255,0.05)",
+              bottom: 10, left: 10,
+              background: "rgba(13, 21, 38, 0.7)",
               backdropFilter: "blur(20px)",
-              border: "1px solid rgba(255,255,255,0.1)",
-              borderRadius: 20,
-              padding: "20px 24px",
-              boxShadow: "0 20px 40px rgba(0,0,0,0.2)",
-              textAlign: "center",
-              display: "flex", flexDirection: "column", alignItems: "center", gap: 12,
+              WebkitBackdropFilter: "blur(20px)",
+              border: "1px solid rgba(6, 182, 212, 0.3)",
+              borderRadius: 12,
+              padding: "10px 16px",
+              boxShadow: "0 20px 40px rgba(0,0,0,0.4)",
+              display: "flex", alignItems: "center", gap: 8,
               animation: "float 6s ease-in-out infinite",
               animationDelay: "3s"
             }}>
-              <div style={{ width: 48, height: 48, borderRadius: "50%", background: "rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <Icon name="ai" size={24} color="white" />
+              <div style={{ width: 28, height: 28, borderRadius: "50%", background: "rgba(6, 182, 212, 0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Icon name="ai" size={14} color="#06b6d4" />
               </div>
-              <div style={{ color: "white", fontWeight: 700, fontSize: 13, maxWidth: 120, lineHeight: 1.4 }}>
-                AI-Powered Resume Filtering
+              <div style={{ color: "white", fontWeight: 700, fontSize: 11, lineHeight: 1.3 }}>
+                Smart Skill Mapping
               </div>
             </div>
 
@@ -348,14 +337,86 @@ const LoginPage = ({ setRole, setActivePage, onLogin }) => {
       </div>
 
       <style>{`
+        .login-container {
+          display: flex;
+          flex-wrap: wrap;
+          height: 100vh;
+          overflow: hidden;
+          background-color: var(--bg-primary, #050814);
+          color: var(--text-primary);
+        }
+
+        .login-left-section {
+          flex: 1 1 50%;
+          min-width: 320px;
+          padding: 24px 6%;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          background-color: var(--bg-primary, #050814);
+          position: relative;
+          height: 100%;
+          overflow: hidden;
+        }
+
+        .login-right-section {
+          flex: 1 1 50%;
+          min-width: 320px;
+          background: linear-gradient(135deg, #0b0d1e 0%, #15193f 40%, #20265f 85%, #2a327e 100%);
+          color: var(--text-primary, #f1f5f9);
+          padding: 40px 6%;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          position: relative;
+          overflow: hidden;
+          height: 100%;
+          border-left: 1px solid var(--border-light, rgba(255, 255, 255, 0.06));
+        }
+
+        .login-left-section::-webkit-scrollbar {
+          width: 6px;
+        }
+        .login-left-section::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .login-left-section::-webkit-scrollbar-thumb {
+          background: rgba(99, 102, 241, 0.3);
+          border-radius: 9999px;
+        }
+
+        /* Prevent Chrome/Edge autofill from overriding dark theme input styles */
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover, 
+        input:-webkit-autofill:focus, 
+        input:-webkit-autofill:active {
+          -webkit-text-fill-color: white !important;
+          -webkit-box-shadow: 0 0 0 1000px #161f30 inset !important;
+          transition: background-color 5000s ease-in-out 0s;
+        }
+
         @keyframes float {
           0% { transform: translateY(0px); }
           50% { transform: translateY(-10px); }
           100% { transform: translateY(0px); }
         }
         
-        /* Add some specific responsive adjustments */
         @media (max-width: 800px) {
+          .login-container {
+            height: auto;
+            min-height: 100vh;
+            overflow: auto;
+          }
+          .login-left-section {
+            height: auto;
+            overflow: visible;
+            padding: 60px 24px 40px;
+          }
+          .login-right-section {
+            height: auto;
+            overflow: visible;
+            padding: 40px 24px 60px;
+          }
           .glass-card { margin: 0; }
         }
       `}</style>
