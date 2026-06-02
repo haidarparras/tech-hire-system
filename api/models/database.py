@@ -60,6 +60,8 @@ class Candidate(Base):
     status     = Column(String(50), default="new")      # new | reviewed | hired | rejected
     avatar     = Column(String(10), default="👤")
     color      = Column(String(20), default="#6366f1")
+    cv_path    = Column(String(500), nullable=True)       # path file CV yang diupload
+    cv_filename = Column(String(255), nullable=True)      # nama asli file CV
     created_at = Column(DateTime, default=datetime.utcnow)
 
 

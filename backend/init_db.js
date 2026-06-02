@@ -74,6 +74,10 @@ async function initDb() {
       )
     `);
 
+    // ── 6. Migrasi: tambah kolom CV ke tabel candidates jika belum ada ───────
+    try { await pool.query(`ALTER TABLE candidates ADD COLUMN cv_path VARCHAR(500) NULL`); } catch (_) {}
+    try { await pool.query(`ALTER TABLE candidates ADD COLUMN cv_filename VARCHAR(255) NULL`); } catch (_) {}
+
     console.log('[DB] Database initialized: semua tabel siap.');
   } catch (error) {
     console.error('[DB ERROR] Gagal menginisialisasi database:', error);
