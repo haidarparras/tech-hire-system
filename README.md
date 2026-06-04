@@ -177,7 +177,7 @@ api/ml_models/
 
 Model mampu mengklasifikasikan CV ke dalam 7 kategori bidang pekerjaan:
 
-`IT` · `Sales` · `Business Development` · `Finance` · `HR` · `Engineering` · `Marketing`
+`Data Science` · `Database` · `DevOps` · `Java Developer` · `Python Developer` · `SQL Developer` · `Testing`
 
 ### Input & Output
 
