@@ -5,7 +5,7 @@
  * agar Authorization header JWT otomatis disertakan.
  */
 
-export const BACKEND_URL = "http://localhost:5000";
+export const BACKEND_URL = "https://tech-hire-system.vercel.app";
 export const AI_URL      = "http://localhost:8000";
 
 /**
