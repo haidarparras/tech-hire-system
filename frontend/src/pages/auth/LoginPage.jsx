@@ -32,10 +32,14 @@ const LoginPage = ({ setRole, setActivePage, onLogin }) => {
 
       const data = await response.json();
 
+      // Jika response gagal, tampilkan error dan JANGAN redirect
       if (!response.ok) {
-        throw new Error(data.error || "Terjadi kesalahan");
+        setError(data.error || data.message || "Terjadi kesalahan");
+        setLoading(false);
+        return; // STOP di sini, jangan lanjut ke redirect
       }
 
+      // Hanya eksekusi bagian ini jika login/register SUKSES
       if (isLogin) {
         localStorage.setItem("techhire_token", data.token);
         localStorage.setItem("techhire_user", JSON.stringify(data.user));
@@ -54,7 +58,8 @@ const LoginPage = ({ setRole, setActivePage, onLogin }) => {
         setPassword("");
       }
     } catch (err) {
-      setError(err.message);
+      // Catch untuk error jaringan/fetch, bukan error login
+      setError(err.message || "Terjadi kesalahan koneksi");
     } finally {
       setLoading(false);
     }
