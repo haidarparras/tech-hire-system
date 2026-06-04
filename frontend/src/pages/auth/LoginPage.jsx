@@ -10,6 +10,16 @@ const LoginPage = ({ setRole, setActivePage, onLogin }) => {
   const [role, setFormRole] = useState("user");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const LoginPage = ({ setRole, setActivePage, onLogin }) => {
+  const primaryBrand = "#6366f1";
+  const primaryBrandHover = "#8b5cf6";
+
+  return (
+    <div style={{ color: primaryBrand }}>
+      {/* Konten */}
+    </div>
+  );
+};
 
   const handleSubmit = async (e) => {
     e.preventDefault();
