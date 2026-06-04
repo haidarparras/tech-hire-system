@@ -6,7 +6,7 @@
  */
 
 export const BACKEND_URL = "https://tech-hire-system.vercel.app";
-export const AI_URL      = "http://localhost:8000";
+export const AI_URL      = "https://padukaHaidar-capstoneproject-techhiring.hf.space";
 
 /**
  * Ambil JWT token dari localStorage.
