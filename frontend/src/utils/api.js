@@ -15,7 +15,7 @@ const getToken = () => localStorage.getItem("techhire_token");
 
 /**
  * Lakukan request ke backend dengan JWT header otomatis.
- * Jika token habis/invalid (401/403), otomatis logout.
+ * Jika token habis/invalid (401/403), otomatis logout — KECUALI saat login.
  */
 export const apiFetch = async (path, options = {}) => {
   const token = getToken();
@@ -32,7 +32,8 @@ export const apiFetch = async (path, options = {}) => {
   });
 
   // Jika token tidak valid → paksa logout
-  if (res.status === 401 || res.status === 403) {
+  // TAPI jangan reload saat di halaman login/register (biarkan form handle error)
+  if ((res.status === 401 || res.status === 403) && !path.includes("/api/auth/")) {
     localStorage.removeItem("techhire_token");
     localStorage.removeItem("techhire_user");
     window.location.reload(); // Reload akan trigger redirect ke login
