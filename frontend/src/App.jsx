@@ -41,7 +41,7 @@ function App() {
         const userData = JSON.parse(savedUser);
         setRole(userData.role);
         setUser(userData);
-        // Auto-redirect if on home page
+        // Auto-redirect HANYA jika sedang di home/login saat mount pertama
         if (activePage === "home" || activePage === "login") {
           if (userData.role === "admin") setActivePage("admin-dashboard");
           else if (userData.role === "hrd") setActivePage("hrd-dashboard");
@@ -49,7 +49,7 @@ function App() {
         }
       } catch (e) {}
     }
-  }, []);
+  }, []); // Dependency array kosong — hanya jalan sekali saat mount
 
   const handleLogin = (userData) => {
     setRole(userData.role);

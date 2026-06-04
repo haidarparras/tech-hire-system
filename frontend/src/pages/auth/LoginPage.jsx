@@ -34,7 +34,11 @@ const LoginPage = ({ setRole, setActivePage, onLogin }) => {
 
       // Jika response gagal, tampilkan error dan JANGAN redirect
       if (!response.ok) {
-        setError(data.error || data.message || "Terjadi kesalahan");
+        // HAPUS localStorage lama supaya tidak conflict
+        localStorage.removeItem("techhire_token");
+        localStorage.removeItem("techhire_user");
+        
+        setError(data.error || data.message || "Email atau password salah");
         setLoading(false);
         return; // STOP di sini, jangan lanjut ke redirect
       }
