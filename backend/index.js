@@ -542,6 +542,14 @@ app.post("/api/auth/login", async (req, res) => {
 });
 
 // ── Health Check (Public) ───────────────────────────────────────────────────
+app.get("/", (req, res) => {
+  res.json({
+    status: "ok",
+    service: "Tech Hire Backend",
+    message: "Server utama berhasil berjalan di Vercel!",
+  });
+});
+
 app.get("/health", (req, res) => {
   res.json({
     status: "ok",
