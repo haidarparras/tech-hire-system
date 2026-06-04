@@ -34,20 +34,16 @@ function App() {
   const [role, setRole] = useState("guest");
   const [user, setUser] = useState(null);
 
-  useEffect(() => {
+ useEffect(() => {
     const savedUser = localStorage.getItem("techhire_user");
     if (savedUser) {
       try {
         const userData = JSON.parse(savedUser);
         setRole(userData.role);
         setUser(userData);
-        // Auto-redirect if on home page
-        if (activePage === "home" || activePage === "login") {
-          if (userData.role === "admin") setActivePage("admin-dashboard");
-          else if (userData.role === "hrd") setActivePage("hrd-dashboard");
-          else setActivePage("candidates");
-        }
-      } catch (e) {}
+      } catch (e) {
+        localStorage.clear();
+      }
     }
   }, []);
 
@@ -195,13 +191,15 @@ function App() {
   };
 
   const isDashboardRoute = () => {
-    if (activePage === "home" || activePage === "features" || activePage === "about") return false;
-    if (activePage === "login") return false;
-    return true;
+    const dashboardRoutes = [
+      "candidates", "cv-upload", "admin-dashboard", "users", 
+      "settings", "hrd-dashboard", "jobs", "interviews", "candidates-admin"
+    ];
+    return dashboardRoutes.includes(activePage);
   };
 
   const showAuthPage = isShowingLogin();
-  const showDashboardLayout = isDashboardRoute() && role !== "guest" && !showAuthPage;
+  const showDashboardLayout = role !== "guest" && isDashboardRoute();
 
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>

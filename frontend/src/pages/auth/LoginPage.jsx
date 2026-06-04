@@ -11,9 +11,6 @@ const LoginPage = ({ setRole, setActivePage, onLogin }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const primaryBrand = "#6366f1";
-  const primaryBrandHover = "#8b5cf6";
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -32,21 +29,20 @@ const LoginPage = ({ setRole, setActivePage, onLogin }) => {
 
       const data = await response.json();
 
+      // Jika gagal, set error dan berhenti di sini
       if (!response.ok) {
-        throw new Error(data.error || "Terjadi kesalahan");
+        setError(data.error || "Login gagal, periksa email dan password Anda.");
+        setLoading(false);
+        return;
       }
 
+      // Jika sukses, baru panggil onLogin untuk pindah halaman
       if (isLogin) {
         localStorage.setItem("techhire_token", data.token);
         localStorage.setItem("techhire_user", JSON.stringify(data.user));
-
+        
         if (onLogin) {
           onLogin(data.user);
-        } else {
-          setRole(data.user.role);
-          if (data.user.role === "admin") setActivePage("admin-dashboard");
-          else if (data.user.role === "hrd") setActivePage("hrd-dashboard");
-          else setActivePage("candidates");
         }
       } else {
         setIsLogin(true);
@@ -54,7 +50,8 @@ const LoginPage = ({ setRole, setActivePage, onLogin }) => {
         setPassword("");
       }
     } catch (err) {
-      setError(err.message);
+      setError("Gagal terhubung ke server. Silakan coba lagi.");
+      setLoading(false);
     } finally {
       setLoading(false);
     }
