@@ -4,27 +4,18 @@ import Icon from "../../components/common/Icon";
 const today = new Date();
 const fmt = (d) => d.toLocaleDateString("id-ID", { weekday: "short", day: "numeric", month: "short" });
 
-const dummyInterviews = [
-  { id: 1, name: "Budi Santoso",    position: "Frontend Developer",    time: "09:00",  date: fmt(today),                              type: "Online",  interviewer: "Anita HRD",    status: "scheduled" },
-  { id: 2, name: "Siti Rahayu",     position: "Data Analyst",          time: "11:00",  date: fmt(today),                              type: "Offline", interviewer: "Rudi Manager",  status: "scheduled" },
-  { id: 3, name: "Ahmad Fauzi",     position: "Backend Engineer",      time: "14:30",  date: fmt(new Date(today.getTime() + 86400000)), type: "Online",  interviewer: "Anita HRD",    status: "scheduled" },
-  { id: 4, name: "Dewi Kartika",    position: "UI/UX Designer",        time: "10:00",  date: fmt(new Date(today.getTime() + 86400000)), type: "Online",  interviewer: "Rudi Manager",  status: "done"       },
-  { id: 5, name: "Rizky Pratama",   position: "DevOps Engineer",       time: "13:00",  date: fmt(new Date(today.getTime() + 2*86400000)), type: "Online", interviewer: "Anita HRD",   status: "scheduled" },
-];
-
-const typeColor  = { Online: "#6366f1", Offline: "#10b981" };
+const typeColor = { Online: "#6366f1", Offline: "#10b981" };
 const statusStyle = {
-  scheduled: { label: "Terjadwal", color: "#a5b4fc", bg: "rgba(99,102,241,0.15)", border: "rgba(99,102,241,0.3)" },
-  done:      { label: "Selesai",   color: "#6ee7b7", bg: "rgba(16,185,129,0.15)", border: "rgba(16,185,129,0.3)" },
-  cancelled: { label: "Dibatalkan",color: "#fda4af", bg: "rgba(244,63,94,0.15)",  border: "rgba(244,63,94,0.3)"  },
+  scheduled: { label: "Terjadwal",  color: "#a5b4fc", bg: "rgba(99,102,241,0.15)", border: "rgba(99,102,241,0.3)" },
+  done:      { label: "Selesai",    color: "#6ee7b7", bg: "rgba(16,185,129,0.15)", border: "rgba(16,185,129,0.3)" },
+  cancelled: { label: "Dibatalkan", color: "#fda4af", bg: "rgba(244,63,94,0.15)",  border: "rgba(244,63,94,0.3)"  },
 };
 
 const InterviewsPage = () => {
-  const [interviews, setInterviews] = useState(dummyInterviews);
+  const [interviews, setInterviews] = useState([]);
   const [filterDate, setFilterDate] = useState("all");
 
   const dates = [...new Set(interviews.map(i => i.date))];
-
   const filtered = filterDate === "all" ? interviews : interviews.filter(i => i.date === filterDate);
 
   const markDone = (id) => setInterviews(prev => prev.map(i => i.id === id ? { ...i, status: "done" } : i));
@@ -50,10 +41,10 @@ const InterviewsPage = () => {
         {/* Stats */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: 16, marginBottom: 32 }}>
           {[
-            { label: "Total Interview", value: interviews.length,                                    color: "#6366f1", icon: "calendar"     },
-            { label: "Hari Ini",        value: interviews.filter(i=>i.date===fmt(today)).length,     color: "#10b981", icon: "clock"        },
-            { label: "Terjadwal",       value: interviews.filter(i=>i.status==="scheduled").length,  color: "#f59e0b", icon: "chat"         },
-            { label: "Selesai",         value: interviews.filter(i=>i.status==="done").length,       color: "#8b5cf6", icon: "checkCircle"  },
+            { label: "Total Interview", value: interviews.length,                                   color: "#6366f1", icon: "calendar"    },
+            { label: "Hari Ini",        value: interviews.filter(i => i.date === fmt(today)).length, color: "#10b981", icon: "clock"       },
+            { label: "Terjadwal",       value: interviews.filter(i => i.status === "scheduled").length, color: "#f59e0b", icon: "chat"    },
+            { label: "Selesai",         value: interviews.filter(i => i.status === "done").length,  color: "#8b5cf6", icon: "checkCircle" },
           ].map((m, i) => (
             <div key={i} style={{ background: "var(--bg-card)", border: "1px solid var(--border-light)", borderRadius: "var(--radius-md)", padding: "18px 20px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
@@ -82,51 +73,64 @@ const InterviewsPage = () => {
         </div>
 
         {/* Interview List */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          {filtered.map(iv => {
-            const st = statusStyle[iv.status];
-            return (
-              <div key={iv.id} style={{ background: "var(--bg-card)", border: "1px solid var(--border-light)", borderRadius: "var(--radius-lg)", padding: "20px 24px", display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap" }}>
-                {/* Time badge */}
-                <div style={{ textAlign: "center", minWidth: 56, flexShrink: 0 }}>
-                  <div style={{ fontSize: 18, fontWeight: 800, color: "#a5b4fc" }}>{iv.time}</div>
-                  <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>{iv.date}</div>
-                </div>
-                <div style={{ width: 1, height: 48, background: "var(--border-light)", flexShrink: 0 }} />
-                {/* Info */}
-                <div style={{ flex: 1, minWidth: 160 }}>
-                  <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 4 }}>{iv.name}</div>
-                  <div style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 6 }}>{iv.position}</div>
-                  <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                    <span style={{ fontSize: 12, color: typeColor[iv.type] ?? "#a5b4fc", display: "flex", alignItems: "center", gap: 4 }}>
-                      <Icon name="globe" size={11} color={typeColor[iv.type] ?? "#a5b4fc"} /> {iv.type}
-                    </span>
-                    <span style={{ fontSize: 12, color: "var(--text-muted)", display: "flex", alignItems: "center", gap: 4 }}>
-                      <Icon name="candidates" size={11} color="var(--text-muted)" /> {iv.interviewer}
-                    </span>
+        {filtered.length === 0 ? (
+          <div style={{
+            textAlign: "center", padding: "64px 24px",
+            background: "var(--bg-card)", border: "1px solid var(--border-light)",
+            borderRadius: "var(--radius-lg)",
+          }}>
+            <Icon name="calendar" size={40} color="var(--text-muted)" />
+            <p style={{ marginTop: 16, fontSize: 15, color: "var(--text-muted)" }}>
+              Belum ada jadwal interview.
+            </p>
+          </div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {filtered.map(iv => {
+              const st = statusStyle[iv.status];
+              return (
+                <div key={iv.id} style={{ background: "var(--bg-card)", border: "1px solid var(--border-light)", borderRadius: "var(--radius-lg)", padding: "20px 24px", display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap" }}>
+                  {/* Time badge */}
+                  <div style={{ textAlign: "center", minWidth: 56, flexShrink: 0 }}>
+                    <div style={{ fontSize: 18, fontWeight: 800, color: "#a5b4fc" }}>{iv.time}</div>
+                    <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>{iv.date}</div>
                   </div>
-                </div>
-                {/* Status badge */}
-                <span style={{ padding: "4px 12px", borderRadius: 999, fontSize: 12, fontWeight: 600, background: st.bg, color: st.color, border: `1px solid ${st.border}`, flexShrink: 0 }}>
-                  {st.label}
-                </span>
-                {/* Actions */}
-                {iv.status === "scheduled" && (
-                  <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
-                    <button onClick={() => markDone(iv.id)}
-                      style={{ padding: "8px 14px", borderRadius: 999, fontSize: 12, fontWeight: 500, cursor: "pointer", fontFamily: "var(--font-sans)", background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.3)", color: "#6ee7b7" }}>
-                      Selesai
-                    </button>
-                    <button onClick={() => cancel(iv.id)}
-                      style={{ padding: "8px 14px", borderRadius: 999, fontSize: 12, fontWeight: 500, cursor: "pointer", fontFamily: "var(--font-sans)", background: "rgba(244,63,94,0.1)", border: "1px solid rgba(244,63,94,0.3)", color: "#fda4af" }}>
-                      Batalkan
-                    </button>
+                  <div style={{ width: 1, height: 48, background: "var(--border-light)", flexShrink: 0 }} />
+                  {/* Info */}
+                  <div style={{ flex: 1, minWidth: 160 }}>
+                    <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 4 }}>{iv.name}</div>
+                    <div style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 6 }}>{iv.position}</div>
+                    <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                      <span style={{ fontSize: 12, color: typeColor[iv.type] ?? "#a5b4fc", display: "flex", alignItems: "center", gap: 4 }}>
+                        <Icon name="globe" size={11} color={typeColor[iv.type] ?? "#a5b4fc"} /> {iv.type}
+                      </span>
+                      <span style={{ fontSize: 12, color: "var(--text-muted)", display: "flex", alignItems: "center", gap: 4 }}>
+                        <Icon name="candidates" size={11} color="var(--text-muted)" /> {iv.interviewer}
+                      </span>
+                    </div>
                   </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+                  {/* Status badge */}
+                  <span style={{ padding: "4px 12px", borderRadius: 999, fontSize: 12, fontWeight: 600, background: st.bg, color: st.color, border: `1px solid ${st.border}`, flexShrink: 0 }}>
+                    {st.label}
+                  </span>
+                  {/* Actions */}
+                  {iv.status === "scheduled" && (
+                    <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+                      <button onClick={() => markDone(iv.id)}
+                        style={{ padding: "8px 14px", borderRadius: 999, fontSize: 12, fontWeight: 500, cursor: "pointer", fontFamily: "var(--font-sans)", background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.3)", color: "#6ee7b7" }}>
+                        Selesai
+                      </button>
+                      <button onClick={() => cancel(iv.id)}
+                        style={{ padding: "8px 14px", borderRadius: 999, fontSize: 12, fontWeight: 500, cursor: "pointer", fontFamily: "var(--font-sans)", background: "rgba(244,63,94,0.1)", border: "1px solid rgba(244,63,94,0.3)", color: "#fda4af" }}>
+                        Batalkan
+                      </button>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
 
       </div>
     </div>
