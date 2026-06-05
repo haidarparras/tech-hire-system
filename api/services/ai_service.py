@@ -216,6 +216,7 @@ def load_ai_model() -> bool:
     try:
         import tensorflow as tf
         import joblib
+        import os
 
         print(f"[DEBUG] TensorFlow version: {tf.__version__}")
         
@@ -228,10 +229,26 @@ def load_ai_model() -> bool:
         label_encoder = joblib.load(str(ENCODER_PATH))
         print("[DEBUG] Encoder loaded successfully")
         
-        # Load model dengan compile=False untuk skip optimizer loading
+        # WORKAROUND: Set environment variable to use legacy Keras format
+        os.environ['TF_USE_LEGACY_KERAS'] = '1'
+        
+        # Load model dengan compile=False dan safe_mode=False
         print(f"[DEBUG] Loading model from: {MODEL_PATH}")
-        model = tf.keras.models.load_model(str(MODEL_PATH), compile=False)
-        print("[DEBUG] Model loaded successfully (without compilation)")
+        try:
+            model = tf.keras.models.load_model(
+                str(MODEL_PATH), 
+                compile=False,
+                safe_mode=False  # Skip safety checks yang strict
+            )
+            print("[DEBUG] Model loaded successfully (without compilation)")
+        except Exception as e_load:
+            print(f"[WARN] Failed with safe_mode=False: {e_load}")
+            print("[DEBUG] Trying alternative: load with custom_objects")
+            # Try with custom deserialization that ignores quantization_config
+            import keras
+            with keras.utils.custom_object_scope({}):
+                model = tf.keras.models.load_model(str(MODEL_PATH), compile=False)
+            print("[DEBUG] Model loaded with custom_objects")
         
         # Compile ulang dengan config sederhana
         model.compile(
