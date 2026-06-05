@@ -139,3 +139,29 @@ def reload_model():
             }
     except Exception as e:
         raise HTTPException(500, f"Error saat reload model: {str(e)}")
+
+
+# ── GET /api/ai/debug-paths ─────────────────────────────────
+@router.get("/debug-paths")
+def debug_paths():
+    """Debug endpoint untuk cek path dan file model"""
+    import os
+    from pathlib import Path
+    
+    base_dir = Path(__file__).parent.parent
+    ml_dir = base_dir / "ml_models"
+    
+    return {
+        "base_dir": str(base_dir),
+        "base_dir_exists": base_dir.exists(),
+        "ml_models_dir": str(ml_dir),
+        "ml_models_dir_exists": ml_dir.exists(),
+        "ml_models_contents": list(ml_dir.iterdir()) if ml_dir.exists() else [],
+        "model_path": str(ai_service.MODEL_PATH),
+        "model_exists": ai_service.MODEL_PATH.exists(),
+        "vectorizer_path": str(ai_service.VECTORIZER_PATH),
+        "vectorizer_exists": ai_service.VECTORIZER_PATH.exists(),
+        "encoder_path": str(ai_service.ENCODER_PATH),
+        "encoder_exists": ai_service.ENCODER_PATH.exists(),
+        "current_working_dir": os.getcwd(),
+    }
