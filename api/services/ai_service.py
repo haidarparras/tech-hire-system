@@ -218,6 +218,12 @@ def load_ai_model() -> bool:
         import joblib
 
         print(f"[DEBUG] TensorFlow version: {tf.__version__}")
+
+        # Define custom Dense layer to discard quantization_config (fixes incompatibilities between Keras versions)
+        class PatchedDense(tf.keras.layers.Dense):
+            def __init__(self, *args, **kwargs):
+                kwargs.pop('quantization_config', None)
+                super().__init__(*args, **kwargs)
         
         # Load vectorizer dan encoder dulu
         print(f"[DEBUG] Loading vectorizer from: {VECTORIZER_PATH}")
@@ -228,9 +234,12 @@ def load_ai_model() -> bool:
         label_encoder = joblib.load(str(ENCODER_PATH))
         print("[DEBUG] Encoder loaded successfully")
         
-        # Load .h5 model (legacy format, no quantization_config issues)
+        # Load .h5 model (using custom_objects to bypass quantization_config issues)
         print(f"[DEBUG] Loading .h5 model from: {MODEL_PATH}")
-        model = tf.keras.models.load_model(str(MODEL_PATH))
+        model = tf.keras.models.load_model(
+            str(MODEL_PATH),
+            custom_objects={"Dense": PatchedDense}
+        )
         print("[DEBUG] Model loaded successfully")
         
         print("[AI] Model loaded successfully")
