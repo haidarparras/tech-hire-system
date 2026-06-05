@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Icon from "../../components/common/Icon";
+import { AI_URL } from "../../utils/api";
 
 const Toggle = ({ value, onChange }) => (
   <div onClick={() => onChange(!value)}
@@ -48,6 +49,40 @@ const SettingsPage = () => {
   });
   const [saved, setSaved] = useState(false);
 
+  // AI Model Status
+  const [aiStatus, setAiStatus] = useState(null);
+  const [checkingStatus, setCheckingStatus] = useState(false);
+  const [reloading, setReloading] = useState(false);
+
+  const checkAIStatus = async () => {
+    setCheckingStatus(true);
+    try {
+      const res = await fetch(`${AI_URL}/api/ai/status`);
+      const data = await res.json();
+      setAiStatus(data);
+    } catch (err) {
+      setAiStatus({ error: "Tidak dapat terhubung ke AI service" });
+    }
+    setCheckingStatus(false);
+  };
+
+  const reloadModel = async () => {
+    setReloading(true);
+    try {
+      const res = await fetch(`${AI_URL}/api/ai/reload`, { method: "POST" });
+      const data = await res.json();
+      alert(data.message || "Model berhasil di-reload");
+      await checkAIStatus(); // Refresh status
+    } catch (err) {
+      alert("Gagal reload model: " + err.message);
+    }
+    setReloading(false);
+  };
+
+  useEffect(() => {
+    checkAIStatus();
+  }, []);
+
   const handleSave = () => {
     // Simpan ke localStorage
     localStorage.setItem("settings_aiThreshold", aiThreshold);
@@ -82,6 +117,58 @@ const SettingsPage = () => {
 
         {/* AI Settings */}
         <Section title="Konfigurasi AI Scoring" icon="cpu">
+          {/* AI Model Status */}
+          <div style={{ background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.2)", borderRadius: "var(--radius-md)", padding: "16px 20px", marginBottom: 20 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, marginBottom: 12 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <Icon name="activity" size={16} color="#a5b4fc" />
+                <span style={{ fontSize: 13, fontWeight: 600, color: "#c7d2fe" }}>Status Model AI</span>
+              </div>
+              <div style={{ display: "flex", gap: 8 }}>
+                <button onClick={checkAIStatus} disabled={checkingStatus}
+                  style={{ padding: "6px 14px", borderRadius: 999, fontSize: 12, fontWeight: 500, cursor: checkingStatus ? "not-allowed" : "pointer", fontFamily: "var(--font-sans)", background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)", color: "white", opacity: checkingStatus ? 0.5 : 1 }}>
+                  {checkingStatus ? "Checking..." : "Refresh"}
+                </button>
+                <button onClick={reloadModel} disabled={reloading}
+                  style={{ padding: "6px 14px", borderRadius: 999, fontSize: 12, fontWeight: 500, cursor: reloading ? "not-allowed" : "pointer", fontFamily: "var(--font-sans)", background: "#6366f1", border: "1px solid #818cf8", color: "white", opacity: reloading ? 0.5 : 1 }}>
+                  {reloading ? "Reloading..." : "Reload Model"}
+                </button>
+              </div>
+            </div>
+            
+            {aiStatus && !aiStatus.error && (
+              <div style={{ display: "grid", gap: 8, fontSize: 12 }}>
+                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <span style={{ color: "var(--text-secondary)" }}>Files Present:</span>
+                  <span style={{ fontWeight: 600, color: aiStatus.model_files_present ? "#6ee7b7" : "#fca5a5" }}>
+                    {aiStatus.model_files_present ? "✓ Yes" : "✗ No"}
+                  </span>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <span style={{ color: "var(--text-secondary)" }}>Model Loaded:</span>
+                  <span style={{ fontWeight: 600, color: aiStatus.model_loaded ? "#6ee7b7" : "#fca5a5" }}>
+                    {aiStatus.model_loaded ? "✓ Loaded" : "✗ Not Loaded"}
+                  </span>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <span style={{ color: "var(--text-secondary)" }}>Categories:</span>
+                  <span style={{ fontWeight: 600, color: "#c7d2fe" }}>{aiStatus.categories?.length || 0}</span>
+                </div>
+                {!aiStatus.model_loaded && (
+                  <div style={{ marginTop: 8, padding: "10px 14px", background: "rgba(251,191,36,0.1)", border: "1px solid rgba(251,191,36,0.3)", borderRadius: 6, fontSize: 12, color: "#fcd34d", lineHeight: 1.5 }}>
+                    ⚠️ Model tidak ter-load. Skor AI akan selalu 75%. Klik "Reload Model" atau restart HuggingFace Space.
+                  </div>
+                )}
+              </div>
+            )}
+            
+            {aiStatus?.error && (
+              <div style={{ padding: "10px 14px", background: "rgba(248,113,113,0.1)", border: "1px solid rgba(248,113,113,0.3)", borderRadius: 6, fontSize: 12, color: "#fca5a5" }}>
+                ✗ {aiStatus.error}
+              </div>
+            )}
+          </div>
+
           <Row label="Threshold Skor AI" desc={`Kandidat dengan skor di atas ${aiThreshold}% otomatis direkomendasikan.`}>
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
               <input type="range" min={50} max={95} value={aiThreshold} onChange={e => setAiThreshold(Number(e.target.value))}

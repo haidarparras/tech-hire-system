@@ -117,3 +117,25 @@ def model_status():
             else "[WARN] Model files belum ada di api/ml_models/. Mode fallback aktif."
         ),
     }
+
+
+# ── POST /api/ai/reload ──────────────────────────────────────
+@router.post("/reload")
+def reload_model():
+    """Manual reload model AI (berguna saat HuggingFace Space restart)"""
+    try:
+        success = ai_service.load_ai_model()
+        if success:
+            return {
+                "status": "success",
+                "message": "Model AI berhasil di-reload",
+                "model_loaded": True,
+            }
+        else:
+            return {
+                "status": "failed",
+                "message": "Model files tidak ditemukan atau gagal load",
+                "model_loaded": False,
+            }
+    except Exception as e:
+        raise HTTPException(500, f"Error saat reload model: {str(e)}")
