@@ -29,13 +29,32 @@ const Row = ({ label, desc, children }) => (
 );
 
 const SettingsPage = () => {
-  const [aiThreshold, setAiThreshold] = useState(75);
-  const [maxCandidates, setMaxCandidates] = useState(100);
-  const [emailNotif, setEmailNotif] = useState(true);
-  const [autoRecommend, setAutoRecommend] = useState(true);
+  // Load dari localStorage atau pakai default
+  const [aiThreshold, setAiThreshold] = useState(() => {
+    const saved = localStorage.getItem("settings_aiThreshold");
+    return saved ? Number(saved) : 75;
+  });
+  const [maxCandidates, setMaxCandidates] = useState(() => {
+    const saved = localStorage.getItem("settings_maxCandidates");
+    return saved ? Number(saved) : 100;
+  });
+  const [emailNotif, setEmailNotif] = useState(() => {
+    const saved = localStorage.getItem("settings_emailNotif");
+    return saved ? saved === "true" : true;
+  });
+  const [autoRecommend, setAutoRecommend] = useState(() => {
+    const saved = localStorage.getItem("settings_autoRecommend");
+    return saved ? saved === "true" : true;
+  });
   const [saved, setSaved] = useState(false);
 
   const handleSave = () => {
+    // Simpan ke localStorage
+    localStorage.setItem("settings_aiThreshold", aiThreshold);
+    localStorage.setItem("settings_maxCandidates", maxCandidates);
+    localStorage.setItem("settings_emailNotif", emailNotif);
+    localStorage.setItem("settings_autoRecommend", autoRecommend);
+    
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
   };
