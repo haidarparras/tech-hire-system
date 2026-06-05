@@ -15,7 +15,7 @@ from pathlib import Path
 BASE_DIR = Path(__file__).parent.parent
 ML_MODELS_DIR = BASE_DIR / "ml_models"
 
-MODEL_PATH      = ML_MODELS_DIR / "tech_hire_model_final.keras"
+MODEL_PATH      = ML_MODELS_DIR / "tech_hire_model_final.h5"  # Changed to .h5
 VECTORIZER_PATH = ML_MODELS_DIR / "tfidf_vectorizer_final.pkl"
 ENCODER_PATH    = ML_MODELS_DIR / "label_encoder_final.pkl"
 
@@ -216,11 +216,10 @@ def load_ai_model() -> bool:
     try:
         import tensorflow as tf
         import joblib
-        import os
 
         print(f"[DEBUG] TensorFlow version: {tf.__version__}")
         
-        # Load vectorizer dan encoder dulu (lebih stabil)
+        # Load vectorizer dan encoder dulu
         print(f"[DEBUG] Loading vectorizer from: {VECTORIZER_PATH}")
         vectorizer = joblib.load(str(VECTORIZER_PATH))
         print("[DEBUG] Vectorizer loaded successfully")
@@ -229,34 +228,10 @@ def load_ai_model() -> bool:
         label_encoder = joblib.load(str(ENCODER_PATH))
         print("[DEBUG] Encoder loaded successfully")
         
-        # WORKAROUND: Set environment variable to use legacy Keras format
-        os.environ['TF_USE_LEGACY_KERAS'] = '1'
-        
-        # Load model dengan compile=False dan safe_mode=False
-        print(f"[DEBUG] Loading model from: {MODEL_PATH}")
-        try:
-            model = tf.keras.models.load_model(
-                str(MODEL_PATH), 
-                compile=False,
-                safe_mode=False  # Skip safety checks yang strict
-            )
-            print("[DEBUG] Model loaded successfully (without compilation)")
-        except Exception as e_load:
-            print(f"[WARN] Failed with safe_mode=False: {e_load}")
-            print("[DEBUG] Trying alternative: load with custom_objects")
-            # Try with custom deserialization that ignores quantization_config
-            import keras
-            with keras.utils.custom_object_scope({}):
-                model = tf.keras.models.load_model(str(MODEL_PATH), compile=False)
-            print("[DEBUG] Model loaded with custom_objects")
-        
-        # Compile ulang dengan config sederhana
-        model.compile(
-            optimizer='adam',
-            loss='sparse_categorical_crossentropy',
-            metrics=['accuracy']
-        )
-        print("[DEBUG] Model recompiled successfully")
+        # Load .h5 model (legacy format, no quantization_config issues)
+        print(f"[DEBUG] Loading .h5 model from: {MODEL_PATH}")
+        model = tf.keras.models.load_model(str(MODEL_PATH))
+        print("[DEBUG] Model loaded successfully")
         
         print("[AI] Model loaded successfully")
         print(f"[AI] Categories: {list(label_encoder.classes_)}")
