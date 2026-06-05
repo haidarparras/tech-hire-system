@@ -78,6 +78,10 @@ const CVUploadPage = () => {
     setErrorMsg("");
   };
 
+  const handleDownloadPDF = () => {
+    window.print();
+  };
+
   const analysisSteps = [
     { label: "Membaca dokumen CV", done: progress >= 20 },
     { label: "Mengekstrak informasi pribadi", done: progress >= 40 },
@@ -325,7 +329,7 @@ const CVUploadPage = () => {
 
         {/* Result */}
         {step === "result" && result && (
-          <div className="animate-fade-in">
+          <div className="animate-fade-in" id="print-area">
             {/* Score Card */}
             <div style={{
               background: "linear-gradient(135deg, rgba(99,102,241,0.12), rgba(16,185,129,0.12))",
@@ -459,12 +463,9 @@ const CVUploadPage = () => {
             </div>
 
             {/* Action */}
-            <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-              <button className="btn-primary" style={{ flex: 1, justifyContent: "center", padding: "14px", gap: 8 }}>
-                <Icon name="calendar" size={16} color="white" /> Jadwalkan Interview
-              </button>
-              <button className="btn-secondary" style={{ flex: 1, justifyContent: "center", padding: "14px", gap: 8 }}>
-                <Icon name="download" size={16} color="currentColor" /> Unduh Laporan PDF
+            <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }} className="no-print">
+              <button onClick={handleDownloadPDF} className="btn-primary" style={{ flex: 1, justifyContent: "center", padding: "14px", gap: 8 }}>
+                <Icon name="download" size={16} color="white" /> Unduh Laporan PDF
               </button>
               <button onClick={reset} className="btn-secondary" style={{ padding: "14px 24px", display: "flex", alignItems: "center", gap: 6 }}>
                 <Icon name="refresh" size={16} color="currentColor" /> Analisis Baru
@@ -476,6 +477,32 @@ const CVUploadPage = () => {
         @keyframes spin-slow {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
+        }
+        @media print {
+          /* Sembunyikan sidebar, mobile header, footer, overlay, navbar, dan tombol aksi */
+          aside, .sidebar-container, .sidebar-mobile-header, .sidebar-overlay, nav, footer, .no-print, button {
+            display: none !important;
+          }
+          /* Jadikan area cetak memenuhi seluruh halaman */
+          #print-area {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100% !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            background: #050814 !important; /* Latar belakang premium yang sama dengan dasbor */
+            color: #f1f5f9 !important;
+          }
+          body, html {
+            background: #050814 !important;
+            color: #f1f5f9 !important;
+          }
+          /* Memastikan warna latar belakang diprint */
+          * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
         }
       `}</style>
     </div>
