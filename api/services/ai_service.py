@@ -203,6 +203,12 @@ def load_ai_model() -> bool:
     global model, vectorizer, label_encoder
     _init_nltk()
 
+    print(f"[DEBUG] BASE_DIR: {BASE_DIR}")
+    print(f"[DEBUG] ML_MODELS_DIR: {ML_MODELS_DIR}")
+    print(f"[DEBUG] MODEL_PATH exists: {MODEL_PATH.exists()}")
+    print(f"[DEBUG] VECTORIZER_PATH exists: {VECTORIZER_PATH.exists()}")
+    print(f"[DEBUG] ENCODER_PATH exists: {ENCODER_PATH.exists()}")
+
     if not is_model_ready():
         print("[WARN] Model files not found in api/ml_models/. AI running in fallback mode.")
         return False
@@ -211,15 +217,27 @@ def load_ai_model() -> bool:
         import tensorflow as tf
         import joblib
 
+        print(f"[DEBUG] TensorFlow version: {tf.__version__}")
+        print(f"[DEBUG] Loading model from: {MODEL_PATH}")
         model         = tf.keras.models.load_model(str(MODEL_PATH))
+        print("[DEBUG] Model loaded successfully")
+        
+        print(f"[DEBUG] Loading vectorizer from: {VECTORIZER_PATH}")
         vectorizer    = joblib.load(str(VECTORIZER_PATH))
+        print("[DEBUG] Vectorizer loaded successfully")
+        
+        print(f"[DEBUG] Loading encoder from: {ENCODER_PATH}")
         label_encoder = joblib.load(str(ENCODER_PATH))
+        print("[DEBUG] Encoder loaded successfully")
+        
         print("[AI] Model loaded successfully")
         print(f"[AI] Categories: {list(label_encoder.classes_)}")
         return True
 
     except Exception as e:
         print(f"[ERROR] Could not load AI model: {e}")
+        import traceback
+        traceback.print_exc()
         return False
 
 
