@@ -218,17 +218,28 @@ def load_ai_model() -> bool:
         import joblib
 
         print(f"[DEBUG] TensorFlow version: {tf.__version__}")
-        print(f"[DEBUG] Loading model from: {MODEL_PATH}")
-        model         = tf.keras.models.load_model(str(MODEL_PATH))
-        print("[DEBUG] Model loaded successfully")
         
+        # Load vectorizer dan encoder dulu (lebih stabil)
         print(f"[DEBUG] Loading vectorizer from: {VECTORIZER_PATH}")
-        vectorizer    = joblib.load(str(VECTORIZER_PATH))
+        vectorizer = joblib.load(str(VECTORIZER_PATH))
         print("[DEBUG] Vectorizer loaded successfully")
         
         print(f"[DEBUG] Loading encoder from: {ENCODER_PATH}")
         label_encoder = joblib.load(str(ENCODER_PATH))
         print("[DEBUG] Encoder loaded successfully")
+        
+        # Load model dengan compile=False untuk skip optimizer loading
+        print(f"[DEBUG] Loading model from: {MODEL_PATH}")
+        model = tf.keras.models.load_model(str(MODEL_PATH), compile=False)
+        print("[DEBUG] Model loaded successfully (without compilation)")
+        
+        # Compile ulang dengan config sederhana
+        model.compile(
+            optimizer='adam',
+            loss='sparse_categorical_crossentropy',
+            metrics=['accuracy']
+        )
+        print("[DEBUG] Model recompiled successfully")
         
         print("[AI] Model loaded successfully")
         print(f"[AI] Categories: {list(label_encoder.classes_)}")
