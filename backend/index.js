@@ -542,6 +542,321 @@ app.post("/api/auth/login", async (req, res) => {
   }
 });
 
+// ═══════════════════════════════════════════════════════════════════════════
+// ── CV MANAGEMENT (Protected) ────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
+
+// GET CV aktif + analisis AI milik user yang sedang login
+app.get("/api/cv/me", verifyToken, async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT
+         uc.id          AS cv_id,
+         uc.user_id,
+         uc.file_name,
+         uc.file_size,
+         uc.upload_at,
+         uc.updated_at,
+         ca.id          AS analysis_id,
+         ca.name,
+         ca.position,
+         ca.category,
+         ca.score,
+         ca.skills,
+         ca.experience,
+         ca.education,
+         ca.strengths,
+         ca.gaps,
+         ca.recommendation,
+         ca.model_available,
+         ca.analyzed_at
+       FROM user_cv uc
+       LEFT JOIN cv_analysis ca ON ca.user_cv_id = uc.id
+       WHERE uc.user_id = $1`,
+      [req.user.id]
+    );
+
+    if (rows.length === 0) {
+      return res.json({ cv: null, analysis: null });
+    }
+
+    const row = rows[0];
+    res.json({
+      cv: {
+        id:        row.cv_id,
+        user_id:   row.user_id,
+        file_name: row.file_name,
+        file_size: row.file_size,
+        upload_at: row.upload_at,
+        updated_at: row.updated_at,
+      },
+      analysis: row.analysis_id
+        ? {
+            id:              row.analysis_id,
+            name:            row.name,
+            position:        row.position,
+            category:        row.category,
+            score:           row.score,
+            skills:          row.skills,
+            experience:      row.experience,
+            education:       row.education,
+            strengths:       row.strengths,
+            gaps:            row.gaps,
+            recommendation:  row.recommendation,
+            model_available: row.model_available,
+            analyzed_at:     row.analyzed_at,
+          }
+        : null,
+    });
+  } catch (error) {
+    console.error("Error fetching CV:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// POST simpan / update hasil analisis AI — UPSERT (Satu User = Satu CV Aktif)
+app.post("/api/cv/analysis", verifyToken, async (req, res) => {
+  try {
+    const {
+      file_name,
+      file_size,
+      name,
+      position,
+      category,
+      score,
+      skills,
+      experience,
+      education,
+      strengths,
+      gaps,
+      recommendation,
+      model_available,
+    } = req.body;
+
+    if (!name || score === undefined) {
+      return res.status(400).json({ error: "Field 'name' dan 'score' wajib diisi." });
+    }
+
+    const userId = req.user.id;
+
+    // ── UPSERT user_cv: satu row per user ────────────────────────────────────
+    const cvResult = await pool.query(
+      `INSERT INTO user_cv (user_id, file_name, file_size, upload_at, updated_at)
+         VALUES ($1, $2, $3, NOW(), NOW())
+       ON CONFLICT (user_id) DO UPDATE
+         SET file_name  = EXCLUDED.file_name,
+             file_size  = EXCLUDED.file_size,
+             updated_at = NOW()
+       RETURNING id`,
+      [userId, file_name || null, file_size || null]
+    );
+
+    const userCvId = cvResult.rows[0].id;
+
+    // ── UPSERT cv_analysis: satu row per CV ──────────────────────────────────
+    await pool.query(
+      `INSERT INTO cv_analysis
+         (user_cv_id, user_id, name, position, category, score, skills,
+          experience, education, strengths, gaps, recommendation, model_available, analyzed_at)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,NOW())
+       ON CONFLICT (user_cv_id) DO UPDATE
+         SET name            = EXCLUDED.name,
+             position        = EXCLUDED.position,
+             category        = EXCLUDED.category,
+             score           = EXCLUDED.score,
+             skills          = EXCLUDED.skills,
+             experience      = EXCLUDED.experience,
+             education       = EXCLUDED.education,
+             strengths       = EXCLUDED.strengths,
+             gaps            = EXCLUDED.gaps,
+             recommendation  = EXCLUDED.recommendation,
+             model_available = EXCLUDED.model_available,
+             analyzed_at     = NOW()`,
+      [
+        userCvId,
+        userId,
+        name,
+        position || null,
+        category || null,
+        score,
+        JSON.stringify(skills || []),
+        experience || null,
+        education || null,
+        JSON.stringify(strengths || []),
+        JSON.stringify(gaps || []),
+        recommendation || null,
+        model_available ?? false,
+      ]
+    );
+
+    // ── Catat aktivitas ───────────────────────────────────────────────────────
+    await pool.query(
+      "INSERT INTO activity_logs (user_id, action, description) VALUES ($1, $2, $3)",
+      [userId, "cv_uploaded", `CV '${file_name || "dokumen"}' diupload dan dianalisis AI`]
+    ).catch(() => {}); // non-fatal
+
+    res.status(200).json({ message: "CV dan hasil analisis berhasil disimpan.", cv_id: userCvId });
+  } catch (error) {
+    console.error("Error saving CV analysis:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// GET semua kandidat (satu CV aktif per user) — HRD & Admin
+app.get(
+  "/api/cv/candidates",
+  verifyToken,
+  requireRole("hrd", "admin"),
+  async (req, res) => {
+    try {
+      const { rows } = await pool.query(
+        `SELECT
+           u.id           AS user_id,
+           u.name         AS user_name,
+           u.email,
+           u.created_at   AS registered_at,
+           uc.id          AS cv_id,
+           uc.file_name,
+           uc.file_size,
+           uc.updated_at  AS cv_updated_at,
+           ca.id          AS analysis_id,
+           ca.name        AS candidate_name,
+           ca.position,
+           ca.category,
+           ca.score,
+           ca.skills,
+           ca.experience,
+           ca.education,
+           ca.strengths,
+           ca.gaps,
+           ca.recommendation,
+           ca.model_available,
+           ca.analyzed_at
+         FROM users u
+         LEFT JOIN user_cv   uc ON uc.user_id    = u.id
+         LEFT JOIN cv_analysis ca ON ca.user_cv_id = uc.id
+         LEFT JOIN roles r ON r.id = u.role_id
+         WHERE r.role_name = 'user'
+         ORDER BY ca.score DESC NULLS LAST, u.created_at DESC`
+      );
+
+      const candidates = rows.map((row) => ({
+        user_id:        row.user_id,
+        user_name:      row.user_name,
+        email:          row.email,
+        registered_at:  row.registered_at,
+        has_cv:         !!row.cv_id,
+        cv: row.cv_id
+          ? {
+              id:         row.cv_id,
+              file_name:  row.file_name,
+              file_size:  row.file_size,
+              updated_at: row.cv_updated_at,
+            }
+          : null,
+        analysis: row.analysis_id
+          ? {
+              id:              row.analysis_id,
+              name:            row.candidate_name,
+              position:        row.position,
+              category:        row.category,
+              score:           row.score,
+              skills:          row.skills,
+              experience:      row.experience,
+              education:       row.education,
+              strengths:       row.strengths,
+              gaps:            row.gaps,
+              recommendation:  row.recommendation,
+              model_available: row.model_available,
+              analyzed_at:     row.analyzed_at,
+            }
+          : null,
+      }));
+
+      res.json(candidates);
+    } catch (error) {
+      console.error("Error fetching CV candidates:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+);
+
+// GET detail satu kandidat — HRD & Admin
+app.get(
+  "/api/cv/candidate/:userId",
+  verifyToken,
+  requireRole("hrd", "admin"),
+  async (req, res) => {
+    try {
+      const { rows } = await pool.query(
+        `SELECT
+           u.id           AS user_id,
+           u.name         AS user_name,
+           u.email,
+           u.created_at   AS registered_at,
+           uc.id          AS cv_id,
+           uc.file_name,
+           uc.file_size,
+           uc.updated_at  AS cv_updated_at,
+           ca.id          AS analysis_id,
+           ca.name        AS candidate_name,
+           ca.position,
+           ca.category,
+           ca.score,
+           ca.skills,
+           ca.experience,
+           ca.education,
+           ca.strengths,
+           ca.gaps,
+           ca.recommendation,
+           ca.model_available,
+           ca.analyzed_at
+         FROM users u
+         LEFT JOIN user_cv    uc ON uc.user_id    = u.id
+         LEFT JOIN cv_analysis ca ON ca.user_cv_id = uc.id
+         WHERE u.id = $1`,
+        [req.params.userId]
+      );
+
+      if (rows.length === 0) {
+        return res.status(404).json({ error: "User tidak ditemukan." });
+      }
+
+      const row = rows[0];
+      res.json({
+        user_id:       row.user_id,
+        user_name:     row.user_name,
+        email:         row.email,
+        registered_at: row.registered_at,
+        has_cv:        !!row.cv_id,
+        cv: row.cv_id
+          ? { id: row.cv_id, file_name: row.file_name, file_size: row.file_size, updated_at: row.cv_updated_at }
+          : null,
+        analysis: row.analysis_id
+          ? {
+              id:              row.analysis_id,
+              name:            row.candidate_name,
+              position:        row.position,
+              category:        row.category,
+              score:           row.score,
+              skills:          row.skills,
+              experience:      row.experience,
+              education:       row.education,
+              strengths:       row.strengths,
+              gaps:            row.gaps,
+              recommendation:  row.recommendation,
+              model_available: row.model_available,
+              analyzed_at:     row.analyzed_at,
+            }
+          : null,
+      });
+    } catch (error) {
+      console.error("Error fetching candidate detail:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+);
+
 // ── Health Check (Public) ───────────────────────────────────────────────────
 app.get("/", (req, res) => {
   res.json({

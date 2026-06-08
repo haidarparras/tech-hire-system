@@ -1,10 +1,8 @@
-import json
 import os
-from fastapi import APIRouter, UploadFile, File, HTTPException, Depends, Form
+from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
 from sqlalchemy.orm import Session
-from typing import Optional
 
-from models.database import Candidate, get_db
+from models.database import get_db
 from models.schemas import CVAnalysisResult
 from services import ai_service
 
@@ -35,8 +33,6 @@ CATEGORY_COLORS = {
 @router.post("/analyze", response_model=CVAnalysisResult)
 async def analyze_cv(
     file: UploadFile = File(...),
-    save_to_db: Optional[str] = Form("true"),
-    uploaded_by: Optional[int] = Form(None),
     db: Session = Depends(get_db),
 ):
     # Validasi ekstensi
@@ -58,30 +54,9 @@ async def analyze_cv(
     if not cv_text.strip():
         raise HTTPException(422, "File tidak mengandung teks yang dapat dibaca.")
 
-    # Jalankan AI analysis
+    # Jalankan AI analysis dan kembalikan hasil ke frontend
+    # Penyimpanan ke DB dilakukan oleh Node.js backend via POST /api/cv/analysis
     result = ai_service.analyze_cv(cv_text, file.filename)
-
-    # Simpan ke DB jika diminta
-    should_save = save_to_db.lower() in ("true", "1", "yes")
-    if should_save:
-        try:
-            category = result["category"]
-            candidate = Candidate(
-                name=result["name"],
-                position=result["position"],
-                score=int(result["score"]),
-                skills=result["skills"],        # Langsung list (SQLAlchemy JSON)
-                exp=result["experience"],
-                education=result["education"],
-                status="new",
-                avatar=CATEGORY_AVATARS.get(category, "👤"),
-                color=CATEGORY_COLORS.get(category, "#6366f1"),
-            )
-            db.add(candidate)
-            db.commit()
-        except Exception as e:
-            print(f"[WARN] Gagal simpan kandidat ke DB: {e}")
-
     return CVAnalysisResult(**result)
 
 

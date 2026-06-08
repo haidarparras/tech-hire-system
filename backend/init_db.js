@@ -74,6 +74,42 @@ async function initDb() {
       )
     `);
 
+    // ── 6. Tabel user_cv ────────────────────────────────────────────────────
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS user_cv (
+        id          SERIAL PRIMARY KEY,
+        user_id     INT NOT NULL UNIQUE,
+        file_name   VARCHAR(255),
+        file_size   INT,
+        upload_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+      )
+    `);
+
+    // ── 7. Tabel cv_analysis ────────────────────────────────────────────────
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS cv_analysis (
+        id              SERIAL PRIMARY KEY,
+        user_cv_id      INT NOT NULL UNIQUE,
+        user_id         INT NOT NULL,
+        name            VARCHAR(255),
+        position        VARCHAR(255),
+        category        VARCHAR(100),
+        score           FLOAT,
+        skills          JSONB,
+        experience      VARCHAR(100),
+        education       VARCHAR(255),
+        strengths       JSONB,
+        gaps            JSONB,
+        recommendation  TEXT,
+        model_available BOOLEAN DEFAULT FALSE,
+        analyzed_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_cv_id) REFERENCES user_cv(id) ON DELETE CASCADE,
+        FOREIGN KEY (user_id)    REFERENCES users(id)   ON DELETE CASCADE
+      )
+    `);
+
     console.log("[DB] Database initialized: semua tabel siap.");
   } catch (error) {
     console.error("[DB ERROR] Gagal menginisialisasi database:", error);
