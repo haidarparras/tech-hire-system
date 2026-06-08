@@ -22,8 +22,9 @@ const Sidebar = ({ activePage, setActivePage, role, onLogout, user }) => {
     ];
   } else if (role === "user") {
     navLinks = [
-      { id: "candidates", label: "Beranda",  icon: "home"     },
-      { id: "cv-upload",  label: "Upload CV", icon: "upload"   },
+      { id: "candidates",  label: "Beranda",     icon: "home"      },
+      { id: "jobs-list",   label: "Lowongan",    icon: "briefcase" },
+      { id: "cv-upload",   label: "Upload CV",   icon: "upload"    },
     ];
   }
 

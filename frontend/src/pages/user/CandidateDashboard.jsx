@@ -91,7 +91,7 @@ const CandidateDashboard = ({ setActivePage, user }) => {
               Upload CV
             </button>
             <button 
-              onClick={() => setActivePage("jobs")} // Akan mengarah ke halaman jobs jika diizinkan (atau tambahkan rute public jobs)
+              onClick={() => setActivePage("jobs-list")} // Route baru untuk user
               style={{
                 background: "rgba(0,0,0,0.2)", color: "white", border: "1px solid rgba(255,255,255,0.3)", 
                 borderRadius: 8, padding: "12px 20px", fontSize: 14, fontWeight: 700, cursor: "pointer",

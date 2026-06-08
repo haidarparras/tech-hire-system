@@ -22,6 +22,7 @@ import InterviewsPage from "./pages/hrd/InterviewsPage";
 // Shared / User pages
 import CVUploadPage from "./pages/user/CVUploadPage";
 import CandidateDashboard from "./pages/user/CandidateDashboard";
+import JobsListPage from "./pages/user/JobsListPage";
 
 const PageWrapper = ({ children }) => (
   <div style={{ animation: "fadeInUp 0.4s ease-out" }}>
@@ -143,6 +144,10 @@ function App() {
       case "cv-upload":
         if (role !== "user") return <PageWrapper><LoginPage setRole={setRole} setActivePage={setActivePage} onLogin={handleLogin} /></PageWrapper>;
         return <PageWrapper><CVUploadPage /></PageWrapper>;
+
+      case "jobs-list":
+        if (role !== "user") return <PageWrapper><LoginPage setRole={setRole} setActivePage={setActivePage} onLogin={handleLogin} /></PageWrapper>;
+        return <PageWrapper><JobsListPage /></PageWrapper>;
 
       // ── Admin ───────────────────────────────────────────────────
       case "admin-dashboard":
