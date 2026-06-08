@@ -10,8 +10,10 @@ const CVUploadPage = () => {
   const [result, setResult]           = useState(null);
   const [step, setStep]               = useState("loading"); // loading | noCV | hasCV | ready | analyzing | result | error
   const [errorMsg, setErrorMsg]       = useState("");
-  const [existingCV, setExistingCV]   = useState(null);    // { cv, analysis } dari DB
-  const [saving, setSaving]           = useState(false);   // simpan ke Node.js
+  const [existingCV, setExistingCV]   = useState(null);
+  const [saving, setSaving]           = useState(false);   // proses simpan ke Node.js
+  const [saved, setSaved]             = useState(false);   // sudah tersimpan
+  const [saveError, setSaveError]     = useState("");      // error saat simpan
   const fileRef                       = useRef();
 
   // ── Load CV existing saat halaman dibuka ────────────────────
@@ -56,6 +58,8 @@ const CVUploadPage = () => {
   // ── Simpan hasil analisis ke Node.js (UPSERT) ───────────────
   const saveAnalysisToBackend = async (analysisData, fileObj) => {
     setSaving(true);
+    setSaved(false);
+    setSaveError("");
     try {
       const payload = {
         file_name:       fileObj?.name   || null,
@@ -77,10 +81,13 @@ const CVUploadPage = () => {
         body:   JSON.stringify(payload),
       });
       if (!res.ok) {
-        console.warn("[CV Save] Gagal menyimpan ke backend, status:", res.status);
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || "Gagal menyimpan ke server");
       }
+      setSaved(true);
+      setExistingCV(prev => ({ ...prev, cv: { file_name: fileObj?.name, file_size: fileObj?.size } }));
     } catch (e) {
-      console.warn("[CV Save] Network error:", e);
+      setSaveError(e.message || "Gagal menyimpan ke database");
     } finally {
       setSaving(false);
     }
@@ -118,12 +125,12 @@ const CVUploadPage = () => {
       const data = await res.json();
       setProgress(100);
 
-      // Simpan ke Node.js backend secara background
-      await saveAnalysisToBackend(data, file);
-
+      // Tampilkan hasil dulu — simpan dilakukan user via tombol eksplisit
       setTimeout(() => {
         setResult(data);
-        setExistingCV({ cv: { file_name: file.name, file_size: file.size }, analysis: data });
+        setExistingCV(prev => ({ ...(prev || {}), analysis: data }));
+        setSaved(false);
+        setSaveError("");
         setStep("result");
       }, 500);
     } catch (err) {
@@ -440,17 +447,77 @@ const CVUploadPage = () => {
             <p style={{ fontSize: 14, color: "var(--text-secondary)", lineHeight: 1.8 }}>{result.recommendation}</p>
           </div>
 
-          {/* Actions */}
-          <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }} className="no-print">
-            <button onClick={handleDownloadPDF} className="btn-primary" style={{ flex: 1, justifyContent: "center", padding: "14px", gap: 8 }}>
-              <Icon name="download" size={16} color="white" /> Unduh Laporan PDF
-            </button>
-            <button onClick={() => { setFile(null); setStep("noCV"); }} className="btn-secondary" style={{ padding: "14px 24px", display: "flex", alignItems: "center", gap: 6 }}>
-              <Icon name="upload" size={16} color="currentColor" /> Ganti CV
-            </button>
+
+          {/* ── Simpan & Actions ── */}
+          <div className="no-print">
+
+            {/* Notifikasi status simpan */}
+            {saved && (
+              <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 16px", background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.3)", borderRadius: "var(--radius-md)", marginBottom: 16 }}>
+                <Icon name="checkCircle" size={18} color="#10b981" />
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: "#10b981" }}>CV & Hasil Analisis Berhasil Disimpan!</div>
+                  <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 2 }}>Data tersimpan ke database. HRD dapat melihat profil Anda sekarang.</div>
+                </div>
+              </div>
+            )}
+            {saveError && (
+              <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 16px", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.25)", borderRadius: "var(--radius-md)", marginBottom: 16 }}>
+                <Icon name="warning" size={18} color="#ef4444" />
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: "#ef4444" }}>Gagal Menyimpan</div>
+                  <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 2 }}>{saveError}</div>
+                </div>
+              </div>
+            )}
+
+            {/* Tombol utama: Simpan */}
+            {!saved && (
+              <button
+                onClick={() => saveAnalysisToBackend(result, file)}
+                disabled={saving}
+                style={{
+                  width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
+                  padding: "16px", marginBottom: 12, borderRadius: "var(--radius-md)", border: "none",
+                  background: saving ? "rgba(16,185,129,0.5)" : "linear-gradient(135deg, #10b981, #06b6d4)",
+                  color: "white", fontSize: 16, fontWeight: 700, cursor: saving ? "not-allowed" : "pointer",
+                  fontFamily: "var(--font-sans)", transition: "var(--transition)",
+                  boxShadow: saving ? "none" : "0 4px 20px rgba(16,185,129,0.35)",
+                }}>
+                {saving ? (
+                  <>
+                    <div style={{ width: 18, height: 18, borderRadius: "50%", border: "2px solid rgba(255,255,255,0.4)", borderTop: "2px solid white", animation: "spin-slow 0.8s linear infinite" }} />
+                    Menyimpan ke Database...
+                  </>
+                ) : (
+                  <>
+                    <Icon name="checkCircle" size={18} color="white" />
+                    Simpan CV &amp; Hasil Analisis
+                  </>
+                )}
+              </button>
+            )}
+
+            {/* Tombol sekunder */}
+            <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+              <button onClick={handleDownloadPDF} className="btn-secondary" style={{ flex: 1, justifyContent: "center", padding: "13px", gap: 8, display: "flex", alignItems: "center" }}>
+                <Icon name="download" size={15} color="currentColor" /> Unduh PDF
+              </button>
+              {saved && (
+                <button onClick={() => saveAnalysisToBackend(result, file)} disabled={saving}
+                  style={{ padding: "13px 20px", display: "flex", alignItems: "center", gap: 6, background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.25)", color: "#10b981", borderRadius: "var(--radius-md)", fontSize: 13, fontWeight: 600, cursor: saving ? "not-allowed" : "pointer", fontFamily: "var(--font-sans)" }}>
+                  <Icon name="refresh" size={14} color="#10b981" /> Simpan Ulang
+                </button>
+              )}
+              <button onClick={() => { setFile(null); setSaved(false); setSaveError(""); setStep("noCV"); }}
+                className="btn-secondary" style={{ padding: "13px 20px", display: "flex", alignItems: "center", gap: 6 }}>
+                <Icon name="upload" size={15} color="currentColor" /> Ganti CV
+              </button>
+            </div>
           </div>
         </div>
       )}
+
 
       <style>{`
         @keyframes spin-slow {
